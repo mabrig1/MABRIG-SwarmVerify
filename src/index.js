@@ -1,3 +1,4 @@
+import {runSwarmDemo, FREE_MODELS} from './swarm-demo.js';
 /** MABRIG SwarmVerify Cloud — conservative server-side HTTP/HTML inspection.
  * Not a Chromium test, pentest, accessibility certification, or 50-agent AI swarm.
  */
@@ -121,15 +122,24 @@ export async function runAudit(raw,env) {
 export default {
   async fetch(request, env) {
     const path=new URL(request.url).pathname;
-    if(path==='/api/health' && request.method==='GET') return json({status:'ok',version:'0.2.0-cloud',mode:'server-http',audit_enabled:typeof env.ADMIN_TOKEN==='string'&&env.ADMIN_TOKEN.length>=20,allowed_hosts:allowedHosts(env)});
-    if(path==='/api/audit' && request.method==='POST') {
+    if(path==='/api/health' && request.method==='GET') return json({status:'ok',version:'0.3.0-cloud',mode:'server-http',audit_enabled:typeof env.ADMIN_TOKEN==='string'&&env.ADMIN_TOKEN.length>=20,swarm_demo_configured:typeof env.OPENROUTER_API_KEY==='string'&&env.OPENROUTER_API_KEY.length>=20,free_models:FREE_MODELS,allowed_hosts:allowedHosts(env)});
+    if((path==='/api/audit' || path==='/api/swarm/demo') && request.method==='POST') {
       if(!env.ADMIN_TOKEN||env.ADMIN_TOKEN.length<20) return json({error:'Cloud administrator must set an ADMIN_TOKEN encrypted secret before real audits.'},503);
       const bearer=request.headers.get('authorization')||'';
       if(!bearer.startsWith('Bearer ')||!(await secureEquals(bearer.slice(7),env.ADMIN_TOKEN))) return json({error:'Invalid administrator token.'},401);
       if(Number(request.headers.get('content-length')||0)>4096) return json({error:'Request too large.'},413);
       let input;try{input=await request.json();}catch{return json({error:'Invalid JSON request.'},400);}
       if(typeof input.url!=='string'||input.url.length>500) return json({error:'Provide a valid URL of at most 500 characters.'},422);
-      try{return json(await runAudit(input.url,env));}catch(e){return json({error:String(e.message||'Scan failed.').slice(0,180)},422);}
+      try {
+        if(path==='/api/swarm/demo') {
+          // Fail closed before any outbound audit or model call.
+          validateTarget(input.url,env);
+          if(typeof env.OPENROUTER_API_KEY!=='string'||env.OPENROUTER_API_KEY.length<20)
+            return json({error:'Configure OPENROUTER_API_KEY as an encrypted Cloudflare Worker secret.'},503);
+          return json(await runSwarmDemo(input.url,env,{model:input.model,audit:runAudit}));
+        }
+        return json(await runAudit(input.url,env));
+      } catch(e) {return json({error:String(e.message||'Scan failed.').slice(0,180)},422);}
     }
     if(path.startsWith('/api/')) return json({error:'Not found.'},404);
     return env.ASSETS.fetch(request);

@@ -1,10 +1,10 @@
 {
   "name": "mabrig-swarmverify-cloud",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node --check src/index.js",
+    "build": "node --check src/index.js && node --check src/swarm-demo.js && node --check public/swarm-demo.js",
     "test": "node --test tests/*.test.js",
     "deploy": "wrangler deploy"
   },
