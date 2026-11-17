@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "mabrig-swarmverify",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-16",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "vars": {
+    "AUDIT_ALLOWED_HOSTS": "aiuniversityhq.uk,buildrx.online"
+  }
+}
