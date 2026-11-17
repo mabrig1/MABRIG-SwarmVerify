@@ -105,8 +105,17 @@ export function validateSquadOutput(output, squad, pack) {
 const FALLOUT = 'No verified AI advisory was produced. Inspect the referenced HTTP evidence manually.';
 function noClaim(role, pack, message=FALLOUT) {
   const refs=referencedChecks(role,pack.checks);
-  return { id:role.id,name:role.name,status:'inconclusive',evidence_id:refs[0]||null,
-    observation:message,next_action:'Run an authorized deeper check; do not treat this as a pass.' };
+  const check=pack.checks.find(x=>x.id===refs[0]);
+  const detail=message===FALLOUT && check
+    ? check.title+' — '+check.status.toUpperCase()+'. AI advisory unavailable; this is deterministic evidence only.'
+    : message===FALLOUT?'No corresponding HTTP evidence is available for this specialist.':'No AI conclusion: '+message;
+  const action=check?.status==='not_tested'
+    ? 'Arrange a separate browser or manual test for '+role.name.toLowerCase()+'.'
+    : check?.status==='warn'||check?.status==='fail'
+      ? 'Investigate '+check.title.toLowerCase()+' with authorized verification.'
+      : 'Review the recorded HTTP evidence and plan a deeper test.';
+  return { id:role.id,name:role.name,status:'inconclusive',source:'deterministic',evidence_id:refs[0]||null,
+    observation:compact(detail),next_action:compact(action) };
 }
 function prompt(squad,pack) {
   const task=squad.roles.map(r=>({id:r.id,role:r.name,permitted_evidence_ids:referencedChecks(r,pack.checks)}));
@@ -194,8 +203,10 @@ export async function runSwarmDemo(url,env,opts={}) {
     const alternate=await callFreeSquad(SQUADS[0],pack,'openrouter/free',env.OPENROUTER_API_KEY,opts.fetcher||fetch);
     calls++;
     fallback_used=true;
-    if(alternate.valid_count>0) {primary=alternate;activeModel='openrouter/free';}
-    else primary={...alternate,error:alternate.error+' Fallback also failed; other squads were skipped to preserve free quota.'};
+    activeModel='openrouter/free';
+    if(alternate.valid_count>0) primary=alternate;
+    else primary={...alternate,error:'First model: '+(primary.error||'no validated evidence')+'; free router: '+
+      (alternate.error||'no validated evidence')+'. Remaining squads skipped to conserve free quota.'};
   }
   squads.push(primary);
   if(primary.valid_count>0) {
