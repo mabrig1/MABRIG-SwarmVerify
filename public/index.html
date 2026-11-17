@@ -20,12 +20,13 @@
     .check{display:grid;grid-template-columns:1fr auto;gap:10px;padding:14px 0;border-bottom:1px solid var(--line)}.check strong{display:block}.check p{font-size:12px;color:var(--muted);margin:3px 0}.check small{font-size:12px;color:#acc5db}.result-summary{padding:17px;border:1px solid var(--line);background:#0b2030;border-radius:12px;margin-bottom:18px}.tag{font-size:11px;border:1px solid #42677b;color:var(--mint);padding:4px 9px;border-radius:25px}.history-item{display:flex;gap:15px;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.history-item button{flex-shrink:0}.agent-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.agent{border:1px solid var(--line);padding:20px;border-radius:13px;background:#10263a}.agent span{font-size:25px}.agent p{color:var(--muted);font-size:13px;margin:5px 0}.empty{border:1px dashed #3e6172;border-radius:14px;padding:35px 20px;text-align:center;color:var(--muted)}.hidden{display:none!important}.foot{color:#617f9d;font-size:12px;margin-top:36px}
     @media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}}@media(max-width:680px){.layout{grid-template-columns:1fr}aside{padding:16px;gap:14px}.nav{flex-direction:row;overflow:auto}.navname,.sidebar-bottom{display:none}.nav button{white-space:nowrap;padding:9px;font-size:12px}main{padding:22px 16px}.panel{padding:20px}.grid,.agent-list{grid-template-columns:1fr 1fr}.logo{font-size:15px}}@media(max-width:420px){.grid,.agent-list{grid-template-columns:1fr}}
   </style>
+  <link rel="stylesheet" href="/swarm-demo.css">
 </head>
 <body>
 <div class="layout">
   <aside>
     <div class="logo"><div class="mark">✦</div><div>SWARM<span style="color:var(--mint)">VERIFY</span><small>BY MABRIG TECHNOLOGIES</small></div></div>
-    <div><div class="navname">WORKSPACE</div><div class="nav" role="navigation" aria-label="Primary navigation"><button class="active" data-view="overview"><span>▦</span>Overview</button><button data-view="audit"><span>◎</span>New audit</button><button data-view="history"><span>▤</span>Audit history</button><button data-view="agents"><span>⬡</span>Agent network</button></div></div>
+    <div><div class="navname">WORKSPACE</div><div class="nav" role="navigation" aria-label="Primary navigation"><button class="active" data-view="overview"><span>▦</span>Overview</button><button data-view="audit"><span>◎</span>New audit</button><button data-view="history"><span>▤</span>Audit history</button><button data-view="agents"><span>⬡</span>Agent network</button><button data-view="demo"><span>✦</span>20-agent AI demo</button></div></div>
     <div class="sidebar-bottom"><div>● <span class="online" id="engine-status">Connecting…</span></div><strong>Cloud inspection engine</strong>HTTP / HTML checks · no browser screenshots.<p>Source: <a href="https://github.com/mabrig1/MABRIG-SwarmVerify" target="_blank" rel="noopener noreferrer">GitHub repository</a></p></div>
   </aside>
   <main>
@@ -41,10 +42,51 @@
       <div class="split"><div class="panel"><h2>01 · Target application</h2><div class="field"><label for="target-url">Website URL</label><input id="target-url" value="https://aiuniversityhq.uk" spellcheck="false" autocomplete="url"><p class="hint" id="allowed-hosts">Loading approved hosts…</p></div><div class="field"><label for="operator-token">Operator token</label><input id="operator-token" type="password" placeholder="Cloudflare ADMIN_TOKEN encrypted secret" autocomplete="off"><p class="hint">This is a separate Cloudflare secret from the token you created for your local Python app.</p></div><button id="launch" class="primary" style="width:100%">↗ Launch read-only cloud audit</button><div id="scan-message" class="alert" role="status" aria-live="polite">Real audits are disabled until an administrator configures ADMIN_TOKEN as a Cloudflare encrypted secret.</div></div><div class="panel"><h2>What we'll inspect</h2><div class="check"><div><strong>01 · Reachability</strong><p>HTTP responses and bounded response times</p></div><span class="status pass">HTTP</span></div><div class="check"><div><strong>02 · Navigation</strong><p>Up to three safe internal links</p></div><span class="status pass">HTTP</span></div><div class="check"><div><strong>03 · Accessibility signals</strong><p>Language, alt attributes, labels and headings</p></div><span class="status pass">HTML</span></div><div class="check"><div><strong>04 · Metadata / headers</strong><p>Viewport, title, description, CSP</p></div><span class="status pass">HTML</span></div><div class="alert">Browser rendering, mobile overflow, forms, login and security penetration testing require separate authorized testing infrastructure.</div></div></div>
     </section>
     <section id="view-history" class="view hidden"><h1>Audit history</h1><p class="lead">Recent results are stored only in this browser's local storage, not in Cloudflare's database. Export important evidence for retention.</p><div class="panel"><div class="row"><h2>Previous reports</h2><button id="clear-history" class="ghost">Clear local history</button></div><div id="history-list" class="empty">No completed scans yet.</div></div></section>
-    <section id="view-agents" class="view hidden"><h1>Verification specialists</h1><p class="lead">These are deterministic inspection roles, not independent LLM agents. The genuine 20–50-agent orchestration platform remains a later stage.</p><div class="agent-list"><div class="agent"><span>◎</span><h3>Availability</h3><p>Checks server responses without executing destructive actions.</p></div><div class="agent"><span>↗</span><h3>Navigation</h3><p>Samples approved same-domain GET links.</p></div><div class="agent"><span>♧</span><h3>Accessibility</h3><p>Examines semantic HTML clues, not WCAG conformance.</p></div><div class="agent"><span>▤</span><h3>Metadata</h3><p>Identifies titles, descriptions, viewport and response headers.</p></div><div class="agent"><span>▣</span><h3>Browser / mobile</h3><p>Not tested in Cloud mode; available in local Playwright edition.</p></div><div class="agent"><span>♙</span><h3>Functional flows</h3><p>Not tested; logins, checkout and form submissions are excluded.</p></div></div></section>
+    <section id="view-agents" class="view hidden"><h1>Verification specialists</h1><p class="lead">These are deterministic inspection roles, not independent LLM agents. The 20-role free-model demonstration is available in the 20-agent AI demo tab; full autonomous browser testing remains a later stage.</p><div class="agent-list"><div class="agent"><span>◎</span><h3>Availability</h3><p>Checks server responses without executing destructive actions.</p></div><div class="agent"><span>↗</span><h3>Navigation</h3><p>Samples approved same-domain GET links.</p></div><div class="agent"><span>♧</span><h3>Accessibility</h3><p>Examines semantic HTML clues, not WCAG conformance.</p></div><div class="agent"><span>▤</span><h3>Metadata</h3><p>Identifies titles, descriptions, viewport and response headers.</p></div><div class="agent"><span>▣</span><h3>Browser / mobile</h3><p>Not tested in Cloud mode; available in local Playwright edition.</p></div><div class="agent"><span>♙</span><h3>Functional flows</h3><p>Not tested; logins, checkout and form submissions are excluded.</p></div></div></section>
+
+    <section id="view-demo" class="view hidden">
+      <div class="swarm-top"><div><div class="eyebrow">20 specialist roles · four model calls · free tier</div><h1>Meet the verification swarm.</h1><p class="lead">Run an evidence-grounded demonstration of 20 coordinated QA advisory roles using OpenRouter free models, with genuine responses, clear gaps and reproducible source checks.</p></div><span class="tag" id="swarm-ready">Checking AI configuration…</span></div>
+      <div class="swarm-proof">✦ <strong>How it works:</strong> A live HTTP audit gathers evidence first. Four AI squads each reason about five specialist roles, then a deterministic validator checks their evidence references. No browser interactions, credential testing, payments, code changes or security certification.</div>
+      <div class="split">
+        <div class="panel">
+          <h2>01 · Launch the coordinated demo</h2>
+          <div class="field"><label for="swarm-url">Approved website URL</label><input id="swarm-url" type="url" value="https://aiuniversityhq.uk" autocomplete="url" spellcheck="false"><p class="hint" id="swarm-allowlist">Checking approved hosts…</p></div>
+          <div class="field"><label for="swarm-token">Private operator token</label><input id="swarm-token" type="password" autocomplete="off" placeholder="ADMIN_TOKEN (not your OpenRouter key)"><p class="hint">Uses your existing Cloudflare ADMIN_TOKEN; cleared after each run. Never paste an OpenRouter key here.</p></div>
+          <div class="field"><label for="swarm-model">OpenRouter model — free only</label><select id="swarm-model" class="swarm-select">
+            <option value="nvidia/nemotron-3.5-lightning:free">Nemotron 3.5 Lightning — fast free default</option>
+            <option value="liquid/lfm-3-1.7b:free">LFM3 1.7B — compact free alternative</option>
+            <option value="openrouter/free">OpenRouter Free Router — provider fallback</option>
+          </select><p class="hint">Exactly four model requests maximum per demo (unless no HTTP page can be fetched). Free models have account quotas and may be unavailable.</p></div>
+          <button id="swarm-launch" class="primary" style="width:100%">✦ Run 20-role AI demonstration</button>
+          <div id="swarm-feedback" class="swarm-feedback" role="status" aria-live="polite">Checking the AI configuration…</div>
+        </div>
+        <div class="panel">
+          <h2>02 · Four accountable squads</h2>
+          <div class="check"><div><strong>01 · Discovery</strong><p>Reachability, navigation, accessibility, metadata, viewport</p></div><span class="tag">5 roles</span></div>
+          <div class="check"><div><strong>02 · Safety</strong><p>MIME protection, CSP, labels, headings, latency</p></div><span class="tag">5 roles</span></div>
+          <div class="check"><div><strong>03 · Functional gaps</strong><p>JavaScript, mobile, sign-in, checkout, API behavior</p></div><span class="tag">5 roles</span></div>
+          <div class="check"><div><strong>04 · Release review</strong><p>Privacy, content, UX, evidence validation, launch gate</p></div><span class="tag">5 roles</span></div>
+          <div class="alert">Only public summary signals are shared with the chosen free-model provider. Never submit personal data or sensitive source code. AI advice is never treated as a passed test.</div>
+        </div>
+      </div>
+      <div id="swarm-results" class="hidden">
+        <div class="line"></div>
+        <div class="row"><h2>Live coordinated results</h2><button class="secondary" id="swarm-export" disabled>Export evidence JSON</button></div>
+        <div class="swarm-stats">
+          <div class="swarm-stat"><small>Specialist roles</small><b id="swarm-run-count">—</b></div>
+          <div class="swarm-stat"><small>AI advisories grounded</small><b id="swarm-ai-count">—</b></div>
+          <div class="swarm-stat"><small>OpenRouter calls</small><b id="swarm-calls">—</b></div>
+          <div class="swarm-stat"><small>HTTP-only audit score</small><b id="swarm-http-score">—</b></div>
+        </div>
+        <p class="small muted" id="swarm-explanation"></p>
+        <div class="swarm-squad-list" id="swarm-squads" aria-label="Squad outcomes"></div>
+        <div class="swarm-grid" id="swarm-cards" aria-label="Twenty agent role results"></div>
+      </div>
+    </section>
     <div class="foot">© 2026 MABRIG Technologies · SwarmVerify Cloud v0.2 · Authorized testing only · No claims of security certification.</div>
   </main>
 </div>
+<script defer src="/swarm-demo.js"></script>
 <script>
 (()=>{
 'use strict';
