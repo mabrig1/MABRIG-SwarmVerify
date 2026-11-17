@@ -51,6 +51,7 @@
       $('swarm-ready').className=ready?'online':'muted';
       $('swarm-allowlist').textContent='Approved targets: '+(h.allowed_hosts||[]).join(', ');
       if(!ready) status('OPENROUTER_API_KEY and ADMIN_TOKEN must be encrypted Cloudflare Worker secrets. Do not paste a key into the site.',true);
+      else status('Ready. Enter your operator token and select an approved website to run the 20-role demo.');
     } catch {
       status('Could not check the server configuration. Verify the deployment and try again.',true);
     }
