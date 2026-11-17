@@ -22,7 +22,7 @@
     $('swarm-explanation').textContent=data.disclaimer||'Advisory demonstration; no browser actions.';
     const squads=$('swarm-squads');squads.replaceChildren();
     for(const s of data.squads||[]) {
-      const div=textNode('div','swarm-squad'+(s.status==='unavailable'?' error':''),s.id+' · '+s.name+' · '+s.status+(s.error?' · '+s.error:''));
+      const div=textNode('div','swarm-squad'+(['unavailable','skipped'].includes(s.status)?' error':''),s.id+' · '+s.name+' · '+s.status+' · '+(s.model||'not called')+(s.error?' · '+s.error:''));
       squads.append(div);
     }
     const cards=$('swarm-cards');cards.replaceChildren();
@@ -38,8 +38,12 @@
       cards.append(card);
     }
     $('swarm-export').disabled=false;
-    status('Finished: '+(data.agents||[]).filter(x=>x.status==='ai_advisory').length+
-      '/20 roles produced evidence-referenced AI advisories. Inconclusive roles were not counted as passes.');
+    const grounded=(data.agents||[]).filter(x=>x.status==='ai_advisory').length;
+    const label='Completed with '+grounded+'/20 evidence-grounded AI advisories after '+String(data.calls_made??0)+
+      ' free-model calls. Model used: '+(data.active_model||data.model||'not available')+
+      (data.fallback_used?' (free fallback activated).':'')+
+      ' Untested items remain untested.';
+    status(label,grounded===0);
   }
   async function setup() {
     try {
@@ -61,7 +65,7 @@
     const url=$('swarm-url').value.trim(),model=$('swarm-model').value;
     button.disabled=true;
     $('swarm-results').classList.add('hidden');
-    status('Coordinating four small AI batches over 20 specialized roles; free model responses may take time.');
+    status('Testing one AI squad first. If unusable, trying one free fallback before continuing; up to five free requests.');
     try {
       const response=await fetch('/api/swarm/demo',{
         method:'POST',cache:'no-store',

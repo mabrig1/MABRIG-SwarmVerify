@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import worker from '../src/index.js';
-import {FREE_MODELS,ROLES,selectFreeModel,evidencePack,validateSquadOutput,runSwarmDemo} from '../src/swarm-demo.js';
+import {FREE_MODELS,ROLES,selectFreeModel,evidencePack,validateSquadOutput,parseProviderReply,runSwarmDemo} from '../src/swarm-demo.js';
 
 const env={AUDIT_ALLOWED_HOSTS:'aiuniversityhq.uk,buildrx.online',ADMIN_TOKEN:'a-private-test-token-that-is-long-enough',OPENROUTER_API_KEY:'test-only-key-not-a-real-secret-0123456'};
 const audit={url:'https://aiuniversityhq.uk/',score:91,pages_scanned:4,checks:[
@@ -67,10 +67,11 @@ test('malformed provider JSON and exhausted free quota are marked inconclusive, 
   let count=0;
   const result=await runSwarmDemo('https://aiuniversityhq.uk',env,{audit:async()=>audit,
     fetcher:async()=>{count++;return new Response('busy',{status:429});}});
-  assert.equal(count,4);
+  assert.equal(count,1,'Do not waste more quota after rate limiting');
+  assert.equal(result.calls_made,1);
   assert.equal(result.agents.filter(x=>x.status==='ai_advisory').length,0);
-  assert.ok(result.squads.every(s=>s.status==='unavailable'));
-  assert.ok(result.squads.every(s=>s.error.includes('429')));
+  assert.equal(result.squads[0].error_code,'http_429');
+  assert.ok(result.squads.slice(1).every(s=>s.status==='skipped'));
 });
 test('no HTTP evidence means no model calls',async()=>{
   const empty={...audit,pages_scanned:0,checks:[{title:'Page reachability',status:'fail'}]};
@@ -98,4 +99,49 @@ test('reject unsupported evidence id in model reply',()=>{
   const squad={roles:[ROLES[0]]};
   const record={agents:[{id:'A01',evidence_id:'C99',observation:'Fake check passed.',next_action:'No need to act.'}]};
   assert.equal(validateSquadOutput(record,squad,evidencePack(audit)).size,0);
+});
+
+test('parses compact text lines and JSON fenced responses from free models',()=>{
+  const text='A01|C01|HTTP 200 was observed.|Verify site returns HTTP 200.\nA02|C02|Links were sampled.|Inspect all key journeys.';
+  const result=parseProviderReply({content:text},'stop');
+  assert.equal(result.agents.length,2);
+  assert.equal(result.agents[0].evidence_id,'C01');
+  assert.equal(parseProviderReply({content:'\`\`\`json\n{"agents":[{"id":"A01","evidence_id":"C01","observation":"HTTP 200 observed","next_action":"Recheck"}]}\n\`\`\`'},'stop').agents.length,1);
+});
+
+test('distinguishes empty thinking-only output from malformed text',()=>{
+  assert.throws(()=>parseProviderReply({content:'',reasoning:'thinking'},'length'),/reasoning_without_answer/);
+  assert.throws(()=>parseProviderReply({content:''},'stop'),/empty_model_answer/);
+  assert.throws(()=>parseProviderReply({content:'not json and not agent lines'},'length'),/truncated_model_answer/);
+});
+
+test('uses only one extra free fallback when first model gives reasoning but no final answer',async()=>{
+  const seen=[];
+  const fakeFetch=async(_url,init)=>{
+    const body=JSON.parse(init.body);seen.push(body.model);
+    if(body.model==='nvidia/nemotron-3.5-lightning:free')
+      return new Response(JSON.stringify({choices:[{finish_reason:'length',message:{content:null,reasoning:'private reasoning not returned'}}]}),{status:200});
+    const task=JSON.parse(body.messages[1].content);
+    const text=task.roles.filter(r=>r.permitted_evidence_ids.length).map(r=>
+      r.id+'|'+r.permitted_evidence_ids[0]+'|HTTP check status observed.|Run a further authorized check.'
+    ).join('\n');
+    return new Response(JSON.stringify({model:body.model,choices:[{finish_reason:'stop',message:{content:text}}]}),{status:200});
+  };
+  const result=await runSwarmDemo('https://aiuniversityhq.uk',env,{audit:async()=>audit,fetcher:fakeFetch});
+  assert.equal(result.calls_made,5);
+  assert.equal(seen.length,5);
+  assert.equal(seen[0],'nvidia/nemotron-3.5-lightning:free');
+  assert.ok(seen.slice(1).every(model=>model==='openrouter/free'));
+  assert.equal(result.fallback_used,true);
+  assert.equal(result.active_model,'openrouter/free');
+  assert.ok(result.agents.some(x=>x.status==='ai_advisory'));
+});
+
+test('stops after two malformed answers rather than making four more provider calls',async()=>{
+  let count=0;
+  const result=await runSwarmDemo('https://aiuniversityhq.uk',env,{audit:async()=>audit,
+    fetcher:async()=>{count++;return new Response(JSON.stringify({choices:[{message:{content:'not parseable'}}]}),{status:200});}});
+  assert.equal(count,2); assert.equal(result.calls_made,2);
+  assert.equal(result.agents.filter(x=>x.status==='ai_advisory').length,0);
+  assert.ok(result.squads.slice(1).every(s=>s.error_code==='stopped_after_canary_failure'));
 });
