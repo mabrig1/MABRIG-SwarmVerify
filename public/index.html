@@ -45,8 +45,8 @@
     <section id="view-agents" class="view hidden"><h1>Verification specialists</h1><p class="lead">These are deterministic inspection roles, not independent LLM agents. The 20-role free-model demonstration is available in the 20-agent AI demo tab; full autonomous browser testing remains a later stage.</p><div class="agent-list"><div class="agent"><span>◎</span><h3>Availability</h3><p>Checks server responses without executing destructive actions.</p></div><div class="agent"><span>↗</span><h3>Navigation</h3><p>Samples approved same-domain GET links.</p></div><div class="agent"><span>♧</span><h3>Accessibility</h3><p>Examines semantic HTML clues, not WCAG conformance.</p></div><div class="agent"><span>▤</span><h3>Metadata</h3><p>Identifies titles, descriptions, viewport and response headers.</p></div><div class="agent"><span>▣</span><h3>Browser / mobile</h3><p>Not tested in Cloud mode; available in local Playwright edition.</p></div><div class="agent"><span>♙</span><h3>Functional flows</h3><p>Not tested; logins, checkout and form submissions are excluded.</p></div></div></section>
 
     <section id="view-demo" class="view hidden">
-      <div class="swarm-top"><div><div class="eyebrow">20 specialist roles · four model calls · free tier</div><h1>Meet the verification swarm.</h1><p class="lead">Run an evidence-grounded demonstration of 20 coordinated QA advisory roles using OpenRouter free models, with genuine responses, clear gaps and reproducible source checks.</p></div><span class="tag" id="swarm-ready">Checking AI configuration…</span></div>
-      <div class="swarm-proof">✦ <strong>How it works:</strong> A live HTTP audit gathers evidence first. Four AI squads each reason about five specialist roles, then a deterministic validator checks their evidence references. No browser interactions, credential testing, payments, code changes or security certification.</div>
+      <div class="swarm-top"><div><div class="eyebrow">20 specialist roles · verified AI advice · free models</div><h1>Meet the verification swarm.</h1><p class="lead">Run an evidence-grounded demonstration of 20 coordinated QA advisory roles using OpenRouter free models, with genuine responses, clear gaps and reproducible source checks.</p></div><span class="tag" id="swarm-ready">Checking AI configuration…</span></div>
+      <div class="swarm-proof">✦ <strong>How it works:</strong> A live HTTP audit gathers evidence first. Four advisory squads each assess five specialist roles, then a deterministic validator checks their evidence references. No browser interactions, credential testing, payments, code changes or security certification.</div>
       <div class="split">
         <div class="panel">
           <h2>01 · Launch the coordinated demo</h2>
@@ -56,7 +56,7 @@
             <option value="nvidia/nemotron-3.5-lightning:free">Nemotron 3.5 Lightning — fast free default</option>
             <option value="liquid/lfm-3-1.7b:free">LFM3 1.7B — compact free alternative</option>
             <option value="openrouter/free">OpenRouter Free Router — provider fallback</option>
-          </select><p class="hint">Exactly four model requests maximum per demo (unless no HTTP page can be fetched). Free models have account quotas and may be unavailable.</p></div>
+          </select><p class="hint">First squad runs as a diagnostic. If its answer is unusable, one free-router fallback may run. Up to five free requests total; failed attempts consume quota.</p></div>
           <button id="swarm-launch" class="primary" style="width:100%">✦ Run 20-role AI demonstration</button>
           <div id="swarm-feedback" class="swarm-feedback" role="status" aria-live="polite">Checking the AI configuration…</div>
         </div>
@@ -83,7 +83,7 @@
         <div class="swarm-grid" id="swarm-cards" aria-label="Twenty agent role results"></div>
       </div>
     </section>
-    <div class="foot">© 2026 MABRIG Technologies · SwarmVerify Cloud v0.2 · Authorized testing only · No claims of security certification.</div>
+    <div class="foot">© 2026 MABRIG Technologies · SwarmVerify Cloud v0.3.1 · Authorized testing only · No claims of security certification.</div>
   </main>
 </div>
 <script defer src="/swarm-demo.js"></script>
